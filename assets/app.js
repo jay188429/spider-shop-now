@@ -158,13 +158,48 @@ function paintCheckout() {
   const form = document.querySelector("#pay-form");
   if (!form) return;
 
+  // 결제 화면이 열린 순간, 할인 후 상품 합계와 장바구니 전체 상품을 전송합니다.
+  const cartItems = Cart.read().map(i => {
+    const p = findProduct(i.id);
+    return { item_id: p.id, item_name: p.name, price: p.price, quantity: i.qty };
+  });
+  const discountedItemsTotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  window.dataLayer = window.dataLayer || [];
+  dataLayer.push({ ecommerce: null });
+  dataLayer.push({
+    event: "begin_checkout",
+    ecommerce: {
+      currency: "KRW",
+      value: discountedItemsTotal,
+      items: cartItems
+    },
+    free_shipping: discountedItemsTotal >= 40000 ? "yes" : "no"
+  });
+
   const sum = document.querySelector("#pay-total");
   if (sum) sum.textContent = won(Cart.total());
 
   form.addEventListener("submit", e => {
     e.preventDefault();
 
-    // ▼ 여기에 「결제를 시작했다」를 알리는 코드가 들어갑니다 (뒤 수업에서)
+    const purchasedItems = Cart.read().map(i => {
+      const p = findProduct(i.id);
+      return p ? { item_id: p.id, item_name: p.name, price: p.price, quantity: i.qty } : null;
+    }).filter(Boolean);
+    const purchaseValue = purchasedItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    const transactionId = `order-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+
+    window.dataLayer = window.dataLayer || [];
+    dataLayer.push({ ecommerce: null });
+    dataLayer.push({
+      event: "purchase",
+      ecommerce: {
+        transaction_id: transactionId,
+        currency: "KRW",
+        value: purchaseValue,
+        items: purchasedItems
+      }
+    });
 
     Cart.clear();
     location.href = "done.html";
