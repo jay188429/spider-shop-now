@@ -24,6 +24,24 @@ const Cart = {
     Cart.write(items);
 
     // ▼ 여기에 「장바구니에 담았다」를 알리는 코드가 들어갑니다 (뒤 수업에서)
+    const p = findProduct(id);
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ ecommerce: null });
+    window.dataLayer.push({
+      event: "add_to_cart",
+      ecommerce: {
+        currency: "KRW",
+        value: p.price,
+        items: [
+          {
+            item_id: p.id,
+            item_name: p.name,
+            price: p.price,
+            quantity: 1
+          }
+        ]
+      }
+    });
 
   },
   remove(id) {
