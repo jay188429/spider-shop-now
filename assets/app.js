@@ -186,7 +186,8 @@ function paintCheckout() {
       const p = findProduct(i.id);
       return p ? { item_id: p.id, item_name: p.name, price: p.price, quantity: i.qty } : null;
     }).filter(Boolean);
-    const purchaseValue = purchasedItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    const rawTotal = purchasedItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    const purchaseValue = rawTotal * 0.9;
     const transactionId = `order-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
     window.dataLayer = window.dataLayer || [];
